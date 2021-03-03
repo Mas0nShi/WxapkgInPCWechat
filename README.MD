@@ -5,12 +5,12 @@ The python version of the unpacking script of the PC WeChat applet
 Decryption & UnPack scheme for PC WeChat applet
 
 ### Usage : 
-```python
+```shell script
     python WxmpcUk.py [wxapkgPath/dirPath] [wxId]
 ```
 
 ### Example :
-```python
+```shell script
     python WxmpcUk.py D:/WxapkgInPCWechat/apps/***.wxapkg wx***
 ```
 
