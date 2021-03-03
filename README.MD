@@ -16,3 +16,5 @@ Decryption & UnPack scheme for PC WeChat applet
 
 ### Tips :
 - Batch UnPack : Put the files in the same dir
+
+![](https://github.com/shiyingqi/WxapkgInPCWechat/blob/master/apps.png)
