@@ -14,6 +14,10 @@ Decryption & UnPack scheme for PC WeChat applet
     python WxmpcUk.py D:/WxapkgInPCWechat/apps/***.wxapkg wx***
 ```
 
+### References : 
+> [微信小程序源码阅读笔记1 - lrdcq](https://lrdcq.com/me/read.php/66.htm)
+
+
 ### Tips :
 - Batch UnPack : Put the files in the same dir
 
