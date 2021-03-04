@@ -17,6 +17,8 @@ Decryption & UnPack scheme for PC WeChat applet
 ### References : 
 > [微信小程序源码阅读笔记1 - lrdcq](https://lrdcq.com/me/read.php/66.htm)
 
+### License :
+Follow the MIT for licensing
 
 ### Tips :
 - Batch UnPack : Put the files in the same dir
