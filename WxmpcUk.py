@@ -106,7 +106,7 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
     :param _rootPath: 根目录
     :param _fileName: wxapkg文件名称
     :param _fileData: wxapkg解密文件数据
-    :return:
+    :return:None
     """
 
     class WxapkgFile(object):
@@ -190,7 +190,7 @@ def pwt(content, end="\n"):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        pyName = os.path.basename(sys.argv[0])
+        pyName = sys.argv[0]
         pwt("Usage : ")
         pwt("       python {0} [AbsFilePath] [wxId]".format(pyName))
         pwt("Example : ")
