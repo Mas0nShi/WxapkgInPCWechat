@@ -23,4 +23,4 @@ Follow the MIT for licensing
 ### Tips :
 - Batch UnPack : Put the files in the same dir
 
-![](https://github.com/shiyingqi/WxapkgInPCWechat/blob/master/apps.png)
+![](https://github.com/Mas0nShi/WxapkgInPCWechat/blob/master/apps.png)
