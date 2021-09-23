@@ -48,10 +48,14 @@ class DepthTraversal:
 
 
 class repairPkg:
-    def __init__(self, rootPath):
-        self.rootPath = rootPath
+    def __init__(self, fileName):
+        """
+        repair pkg class
+        :param fileName: app-service.js
+        """
+        self.rootPath = os.path.dirname(fileName)
         self.sliceArr = []
-        fileName = os.path.join(rootPath, "app-service.js")
+
         try:
             with open(fileName, "rb") as f:
                 self.data = f.read()
@@ -200,7 +204,7 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
     for st in fileList:
         outFileName = st.name.decode("utf-8")
         outFilePath = _rootPath + '\\' + dirName + outFileName
-        nameList.append(outFileName)
+        nameList.append(outFilePath)
         dirPath = os.path.dirname(outFilePath)
         if not os.path.exists(dirPath):
             os.makedirs(dirPath)
@@ -211,10 +215,10 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
         logger.success('save : {}'.format(outFileName))
     f.close()
 
-    if "/app-service.js" in nameList:  # 是否存在 app-service.js
-        return True
-    else:
-        return False
+    for i in nameList:
+        if i.endswith("app-service.js"):
+            return i
+    return None
 
 
 def decWithunPack(filePath, wxId):
@@ -226,20 +230,22 @@ def decWithunPack(filePath, wxId):
             rootPath = os.path.dirname(file)
             fileName = os.path.basename(file)
             logger.info("Working with files : {}".format(fileName))
+            # decrypt pkg
             decPathData = decPCWxapkg(file, wxId)
-            if WxapkgUnPack(rootPath, fileName, decPathData):
-
-                fix = repairPkg(os.path.join(rootPath, os.path.splitext(fileName)[0]))
-                fix.exportFile()
+            serviceFile = WxapkgUnPack(rootPath, fileName, decPathData)
+            # fix pkg
+            fix = repairPkg(serviceFile)
+            fix.exportFile()
 
     else:
         rootPath = os.path.dirname(filePath)
         fileName = os.path.basename(filePath)
+        # decrypt pkg
         decPathData = decPCWxapkg(filePath, wxId)
-        if WxapkgUnPack(rootPath, fileName, decPathData):
-
-            fix = repairPkg(os.path.join(rootPath,os.path.splitext(fileName)[0]))
-            fix.exportFile()
+        serviceFile = WxapkgUnPack(rootPath, fileName, decPathData)
+        # fix pkg
+        fix = repairPkg(serviceFile)
+        fix.exportFile()
 
 
 def pwt(content, end="\n"):
