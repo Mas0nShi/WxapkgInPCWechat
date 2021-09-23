@@ -1,12 +1,14 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import os
-import sys
 import hashlib
+import os
 import struct
-from loguru import logger
-from Crypto.Cipher import AES
+import sys
 from io import BytesIO
+
+from Crypto.Cipher import AES
+from loguru import logger
+import jsbeautifier
 
 
 class DepthTraversal:
@@ -43,6 +45,48 @@ class DepthTraversal:
         """
         self._deep_iterate_dir(_rootDir)
         return self._files
+
+
+class repairPkg:
+    def __init__(self, rootPath):
+        self.rootPath = rootPath
+        self.sliceArr = []
+        fileName = os.path.join(rootPath, "app-service.js")
+        try:
+            with open(fileName, "rb") as f:
+                self.data = f.read()
+        except FileNotFoundError:
+            logger.error("FileNotFoundError: {}".format(fileName))
+            return
+        logger.debug("start fix wxapkg...")
+
+    def exportFile(self):
+        logger.debug("fix .js")
+
+        class sliceFile(object):
+            name = ""
+            data = b""
+
+        parseData = self.data.split(b"define(\"")
+        self.wxmlData = parseData[0]
+
+        print(jsbeautifier.beautify(self.wxmlData.decode()))
+        for slice in parseData[1:]:
+            arr = slice.split(b"\", ")
+            sfile = sliceFile()
+            sfile.name = arr[0].decode()
+            sfile.data = arr[1][:arr[1].rfind(b"});")+1]
+            self.sliceArr.append(sfile)
+
+        for sfile in self.sliceArr:
+            outFilePath = os.path.join(self.rootPath, sfile.name)
+            dirPath = os.path.dirname(outFilePath)
+            if not os.path.exists(dirPath):
+                os.makedirs(dirPath)
+            with open(outFilePath, "wb") as f:
+                btCode = jsbeautifier.beautify(sfile.data.decode()).encode()  # 美化JavaScript代码
+                f.write(btCode)
+            logger.success("export file: {}".format(sfile.name))
 
 
 def _AESDecrypt(src, key, iv):
@@ -106,7 +150,7 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
     :param _rootPath: 根目录
     :param _fileName: wxapkg文件名称
     :param _fileData: wxapkg解密文件数据
-    :return:None
+    :return: fix?
     """
 
     class WxapkgFile(object):
@@ -151,10 +195,12 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
         fileList.append(data)
 
     # save files
+    nameList = []
     dirName = os.path.splitext(_fileName)[0]
     for st in fileList:
         outFileName = st.name.decode("utf-8")
-        outFilePath = _rootPath + '/' + dirName + outFileName
+        outFilePath = _rootPath + '\\' + dirName + outFileName
+        nameList.append(outFileName)
         dirPath = os.path.dirname(outFilePath)
         if not os.path.exists(dirPath):
             os.makedirs(dirPath)
@@ -164,6 +210,11 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
         w.close()
         logger.success('save : {}'.format(outFileName))
     f.close()
+
+    if "/app-service.js" in nameList:  # 是否存在 app-service.js
+        return True
+    else:
+        return False
 
 
 def decWithunPack(filePath, wxId):
@@ -182,6 +233,7 @@ def decWithunPack(filePath, wxId):
         fileName = os.path.basename(filePath)
         decPathData = decPCWxapkg(filePath, wxId)
         WxapkgUnPack(rootPath, fileName, decPathData)
+        repairPkg(os.path.join(rootPath,os.path.splitext(fileName)[0])).exportFile()
 
 
 def pwt(content, end="\n"):
