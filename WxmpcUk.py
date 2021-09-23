@@ -70,7 +70,7 @@ class repairPkg:
         parseData = self.data.split(b"define(\"")
         self.wxmlData = parseData[0]
 
-        print(jsbeautifier.beautify(self.wxmlData.decode()))
+        # print(jsbeautifier.beautify(self.wxmlData.decode()))
         for slice in parseData[1:]:
             arr = slice.split(b"\", ")
             sfile = sliceFile()
