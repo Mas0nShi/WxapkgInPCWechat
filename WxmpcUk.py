@@ -72,7 +72,7 @@ class repairPkg:
 
         # print(jsbeautifier.beautify(self.wxmlData.decode()))
         for slice in parseData[1:]:
-            arr = slice.split(b"\", ")
+            arr = slice.split(b"\",")
             sfile = sliceFile()
             sfile.name = arr[0].decode()
             sfile.data = arr[1][:arr[1].rfind(b"});")+1]
