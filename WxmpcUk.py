@@ -228,12 +228,18 @@ def decWithunPack(filePath, wxId):
             logger.info("Working with files : {}".format(fileName))
             decPathData = decPCWxapkg(file, wxId)
             WxapkgUnPack(rootPath, fileName, decPathData)
+
+            fix = repairPkg(os.path.join(rootPath, os.path.splitext(fileName)[0]))
+            fix.exportFile()
+
     else:
         rootPath = os.path.dirname(filePath)
         fileName = os.path.basename(filePath)
         decPathData = decPCWxapkg(filePath, wxId)
         WxapkgUnPack(rootPath, fileName, decPathData)
-        repairPkg(os.path.join(rootPath,os.path.splitext(fileName)[0])).exportFile()
+
+        fix = repairPkg(os.path.join(rootPath,os.path.splitext(fileName)[0]))
+        fix.exportFile()
 
 
 def pwt(content, end="\n"):
