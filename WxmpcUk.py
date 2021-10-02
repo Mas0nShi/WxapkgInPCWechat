@@ -4,6 +4,8 @@ import hashlib
 import os
 import struct
 import sys
+import argparse
+
 from io import BytesIO
 
 from Crypto.Cipher import AES
@@ -76,7 +78,7 @@ class repairPkg:
 
         # print(jsbeautifier.beautify(self.wxmlData.decode()))
         for slice in parseData[1:]:
-            arr = slice.split(b"\",")
+            arr = slice.split(b"\",", maxsplit=1)
             sfile = sliceFile()
             sfile.name = arr[0].decode()
             sfile.data = arr[1][:arr[1].rfind(b"});")+1]
@@ -221,31 +223,33 @@ def WxapkgUnPack(_rootPath, _fileName, _fileData):
     return None
 
 
-def decWithunPack(filePath, wxId):
+def _decWunPack(file, wxId, isUnpack):
+    rootPath = os.path.dirname(file)
+    fileName = os.path.basename(file)
+    # decrypt pkg
+    decPathData = decPCWxapkg(file, wxId)
+
+    if isUnpack:
+        serviceFile = WxapkgUnPack(rootPath, fileName, decPathData)
+        # fix pkg
+        fix = repairPkg(serviceFile)
+        fix.exportFile()
+    else:
+
+        with open(os.path.join(rootPath, "dec." + fileName), "wb") as f:
+            f.write(decPathData)
+        logger.info("save decrypt files : {}".format("dec." + fileName))
+
+
+def decWithunPack(filePath, wxId, isUnpack):
     if os.path.isdir(filePath):
         logger.info("Detected the dir, traversed all the wxapkg under the dir")
         dt = DepthTraversal([".wxapkg"])
         pathList = dt.getMatchFiles(filePath)
         for file in pathList:
-            rootPath = os.path.dirname(file)
-            fileName = os.path.basename(file)
-            logger.info("Working with files : {}".format(fileName))
-            # decrypt pkg
-            decPathData = decPCWxapkg(file, wxId)
-            serviceFile = WxapkgUnPack(rootPath, fileName, decPathData)
-            # fix pkg
-            fix = repairPkg(serviceFile)
-            fix.exportFile()
-
+            _decWunPack(file, wxId, isUnpack)
     else:
-        rootPath = os.path.dirname(filePath)
-        fileName = os.path.basename(filePath)
-        # decrypt pkg
-        decPathData = decPCWxapkg(filePath, wxId)
-        serviceFile = WxapkgUnPack(rootPath, fileName, decPathData)
-        # fix pkg
-        fix = repairPkg(serviceFile)
-        fix.exportFile()
+        _decWunPack(filePath, wxId, isUnpack)
 
 
 def pwt(content, end="\n"):
@@ -253,17 +257,21 @@ def pwt(content, end="\n"):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        pyName = sys.argv[0]
-        pwt("Usage : ")
-        pwt("       python {0} [AbsFilePath] [wxId]".format(pyName))
-        pwt("Example : ")
-        pwt("       python {0} D:/WxapkgInPCWechat/apps/***.wxapkg wx****************".format(pyName))
-        pwt("Tips : ")
-        pwt("       AbsFilePath : The full path of the wxapkg file")
-        pwt("              wxId : Applet ID")
-        pwt("\n If you have any questions, please contact [ MasonShi@88.com ]\n")
-        exit(0)
-    path = sys.argv[1]
-    wxid = sys.argv[2]
-    decWithunPack(path, wxid)
+
+    args = argparse.ArgumentParser(description="Quick to parse wxapkg in Wechat for PC.", epilog="If you have any questions, please contact [ MasonShi@88.com ]")
+    args.add_argument("AbsFilePath", type=str, help="The full path of the wxapkg file.")
+    args.add_argument("wxId", type=str, help="Applet ID")
+    args.add_argument("--unpack", type=str, choices=["enabled", "disabled"], default="enabled", help="default enabled, if set to disabled, only decrypt.")
+
+    space = args.parse_args()
+
+    path = space.AbsFilePath
+    wxid = space.wxId
+
+    unpack = True
+    if space.unpack == "disabled":
+        unpack = False
+
+    print(unpack)
+
+    decWithunPack(path, wxid, unpack)
