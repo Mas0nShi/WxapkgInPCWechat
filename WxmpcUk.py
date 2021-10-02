@@ -272,6 +272,4 @@ if __name__ == "__main__":
     if space.unpack == "disabled":
         unpack = False
 
-    print(unpack)
-
     decWithunPack(path, wxid, unpack)
